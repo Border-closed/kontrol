@@ -1,11 +1,14 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class AnimalCommands {
-    public static void displayCommands(Animal animal) {
-        System.out.println("Команды, которые выполняет " + animal.getName() + ":");
-        List<String> commands = animal.getCommands();
-        for (String command : commands) {
-            System.out.println(command);
-        }
+    private List<String> commands = new ArrayList<>();
+
+    public void addCommand(String command) {
+        commands.add(command);
+    }
+
+    public List<String> getCommands() {
+        return commands;
     }
 }
