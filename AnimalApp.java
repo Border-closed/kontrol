@@ -10,55 +10,150 @@
 // типа счетчик была не в ресурсном try и/или ресурс остался открыт. Значение
 // считать в ресурсе try, если при заведения животного заполнены все поля.
 
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class AnimalApp {
+    private static Scanner scanner = new Scanner(System.in);
+
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        AnimalClassifier classifier = new AnimalClassifier();
+        AnimalTrainer trainer = new AnimalTrainer();
 
-        System.out.print("Введите вид животного: ");
-        String species = scanner.nextLine();
+        initAnimals(classifier);
+        showMenu(classifier, trainer);
+    }
 
-        System.out.print("Введите имя животного: ");
-        String name = scanner.nextLine();
+    private static void initAnimals(AnimalClassifier classifier) {
+        List<String> catCommands = new ArrayList<>();
+        catCommands.add("Мяукать");
+        catCommands.add("Ловить мышей");
+        Animal cat = new Animal("Кот", catCommands, AnimalType.DOMESTIC);
+        classifier.addAnimal(cat);
 
-        Animal animal = new Animal(species, name);
+        List<String> horseCommands = new ArrayList<>();
+        horseCommands.add("Игнать");
+        horseCommands.add("Тянуть плуг");
+        Animal horse = new Animal("Лошадь", horseCommands, AnimalType.DRAFT);
+        classifier.addAnimal(horse);
+    }
 
-        int choice;
-        do {
-            System.out.println("\nМеню:");
-            System.out.println("1. Вывести класс животного");
-            System.out.println("2. Вывести список команд");
-            System.out.println("3. Обучить новой команде");
-            System.out.println("0. Выйти");
+    private static void showMenu(AnimalClassifier classifier, AnimalTrainer trainer) {
+        while (true) {
+            System.out.println("Меню:");
+            System.out.println("1. Создать животное");
+            System.out.println("2. Просмотреть список животных");
+            System.out.println("3. Просмотреть команды животного");
+            System.out.println("4. Обучить животное новым командам");
+            System.out.println("5. Вывести количество животных");
+            System.out.println("0. Выход");
+            System.out.print("Введите номер пункта меню: ");
 
-            System.out.print("Выберите действие: ");
-            choice = scanner.nextInt();
-            scanner.nextLine(); // Считываем перевод строки после ввода числа
-
-            switch (choice) {
-                case 1:
-                    String animalClass = AnimalClassifier.classifyAnimal(animal);
-                    System.out.println("Животное " + animal.getName() + " относится к классу: " + animalClass);
-                    break;
-                case 2:
-                    AnimalCommands.displayCommands(animal);
-                    break;
-                case 3:
-                    System.out.print("Введите новую команду для обучения: ");
-                    String newCommand = scanner.nextLine();
-                    AnimalTrainer.teachAnimal(animal, newCommand);
-                    break;
-                case 0:
-                    System.out.println("Программа завершена.");
-                    break;
-                default:
-                    System.out.println("Некорректный выбор. Попробуйте снова.");
+            if (scanner.hasNextInt()) {
+                int choice = scanner.nextInt();
+                switch (choice) {
+                    case 1:
+                        Animal newAnimal = createAnimal();
+                        classifier.addAnimal(newAnimal);
+                        break;
+                    case 2:
+                        displayAnimals(classifier);
+                        break;
+                    case 3:
+                        displayCommands(classifier);
+                        break;
+                    case 4:
+                        teachAnimal(classifier, trainer);
+                        break;
+                    case 5:
+                        System.out.println("Количество животных: " + classifier.getAnimalCount());
+                        break;
+                    case 0:
+                        System.out.println("Выход...");
+                        return;
+                    default:
+                        System.out.println("Неверный ввод. Попробуйте снова.");
+                }
+            } else {
+                String invalidInput = scanner.next();
+                System.out.println("Неверный ввод: " + invalidInput);
+                System.out.println("Пожалуйста, введите номер пункта меню (целое число).");
             }
-        } while (choice != 0);
+        }
+    }
 
-        scanner.close();
+    private static Animal createAnimal() {
+        scanner.nextLine();
+        System.out.print("Введите название животного: ");
+        String name = scanner.nextLine();
+        System.out.print("Введите тип животного (DOMESTIC или DRAFT): ");
+        String typeStr = scanner.nextLine();
+        AnimalType type = AnimalType.valueOf(typeStr.toUpperCase());
+        System.out.print("Введите команды через запятую: ");
+        String commandsInput = scanner.nextLine();
+        String[] commandsArray = commandsInput.split(",");
+        List<String> commands = new ArrayList<>();
+        for (String command : commandsArray) {
+            commands.add(command.trim());
+        }
+        return new Animal(name, commands, type);
+    }
+
+    private static void displayAnimals(AnimalClassifier classifier) {
+        List<Animal> animals = classifier.getAnimals();
+        if (animals.isEmpty()) {
+            System.out.println("Список животных пуст.");
+        } else {
+            System.out.println("Список животных:");
+            for (int i = 0; i < animals.size(); i++) {
+                Animal animal = animals.get(i);
+                System.out.println((i + 1) + ". " + animal.getName() + " - " + animal.getType());
+            }
+        }
+    }
+
+    private static void displayCommands(AnimalClassifier classifier) {
+        List<Animal> animals = classifier.getAnimals();
+        if (animals.isEmpty()) {
+            System.out.println("Список животных пуст.");
+            return;
+        }
+        System.out.print("Введите номер животного: ");
+        int animalIndex = scanner.nextInt();
+        if (animalIndex < 1 || animalIndex > animals.size()) {
+            System.out.println("Неверный номер животного.");
+            return;
+        }
+        Animal selectedAnimal = animals.get(animalIndex - 1);
+        System.out.println("Команды животного " + selectedAnimal.getName() + ":");
+        for (String command : selectedAnimal.getCommands()) {
+            System.out.println("- " + command);
+        }
+    }
+
+    private static void teachAnimal(AnimalClassifier classifier, AnimalTrainer trainer) {
+        List<Animal> animals = classifier.getAnimals();
+        if (animals.isEmpty()) {
+            System.out.println("Список животных пуст.");
+            return;
+        }
+        System.out.print("Введите номер животного: ");
+        int animalIndex = scanner.nextInt();
+        if (animalIndex < 1 || animalIndex > animals.size()) {
+            System.out.println("Неверный номер животного.");
+            return;
+        }
+        scanner.nextLine();
+        Animal selectedAnimal = animals.get(animalIndex - 1);
+        System.out.print("Введите новые команды через запятую: ");
+        String commandsInput = scanner.nextLine();
+        String[] commandsArray = commandsInput.split(",");
+        List<String> newCommands = new ArrayList<>();
+        for (String command : commandsArray) {
+            newCommands.add(command.trim());
+        }
+        trainer.teachAnimal(selectedAnimal, newCommands);
+        System.out.println("Животное " + selectedAnimal.getName() + " обучено новым командам.");
     }
 }
-
