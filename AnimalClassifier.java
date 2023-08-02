@@ -1,11 +1,18 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class AnimalClassifier {
-    public static String classifyAnimal(Animal animal) {
-        String species = animal.getSpecies().toLowerCase();
-        if (species.contains("птиц"))
-            return "Птицы";
-        else if (species.contains("млекопит"))
-            return "Млекопитающие";
-        else
-            return "Неопределенный класс";
+    private List<Animal> animals = new ArrayList<>();
+
+    public void addAnimal(Animal animal) {
+        animals.add(animal);
+    }
+
+    public List<Animal> getAnimals() {
+        return animals;
+    }
+
+    public int getAnimalCount() {
+        return animals.size();
     }
 }
