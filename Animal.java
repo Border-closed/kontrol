@@ -1,20 +1,14 @@
-import java.util.ArrayList;
 import java.util.List;
 
 public class Animal {
-    private String species;
     private String name;
     private List<String> commands;
+    private AnimalType type;
 
-    //создание животного
-    public Animal(String species, String name) {
-        this.species = species;
+    public Animal(String name, List<String> commands, AnimalType type) {
         this.name = name;
-        this.commands = new ArrayList<>();
-    }
-
-    public String getSpecies() {
-        return species;
+        this.commands = commands;
+        this.type = type;
     }
 
     public String getName() {
@@ -25,7 +19,11 @@ public class Animal {
         return commands;
     }
 
-    public void addCommand(String command) {
-        commands.add(command);
+    public AnimalType getType() {
+        return type;
+    }
+
+    public void addCommand(String newCommand) {
+        commands.add(newCommand);
     }
 }
